@@ -28,9 +28,15 @@ The workflow `.github/workflows/android-apk.yml` runs for relevant pull requests
 
 The debug APK is for testing. It is not a signed Play Store release.
 
+## App icon and media permissions
+
+The Android build applies a HUMANOID R1 purple launcher icon (including adaptive and round variants) and the web app manifest uses the matching SVG icon.
+
+Only the permissions needed by current media features are declared: camera, microphone, and audio settings. Capacitor's Android WebView permission handler requests camera or microphone access when the user starts the corresponding feature; the app also explains why access is needed before opening the system prompt. No location, contacts, broad storage, or notification permission is requested because those features are not currently implemented.
+
 ## Current limitations
 
-- Existing camera and microphone WebView permissions must be tested on a physical Android device; a browser preview does not prove native permission behavior.
+- Camera and microphone permission prompts must still be verified on a physical Android device, including deny and grant flows.
 - AI vision image upload is not implemented by this Android wrapper.
 - Push notifications, offline chat, native camera capture, and Play Store signing are future work.
 - The app requires internet because it loads the production website.
