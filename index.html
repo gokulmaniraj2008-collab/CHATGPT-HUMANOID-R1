@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="CHATGPT HUMANOID R1 — see, hear, and speak prototype">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <title>CHATGPT HUMANOID R1</title>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="mark" aria-hidden="true">R1</div>
+      <div>
+        <p class="eyebrow">PHONE PROTOTYPE · PHASE 1</p>
+        <h1>CHATGPT HUMANOID R1</h1>
+        <p class="subtitle">See · Hear · Speak</p>
+      </div>
+    </header>
+
+    <section class="panel camera-panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">VISION</p><h2>Camera</h2></div>
+        <span id="cameraStatus" class="status">Camera off</span>
+      </div>
+      <video id="cameraPreview" autoplay playsinline muted></video>
+      <div class="actions">
+        <button id="startCamera" class="primary">Start camera</button>
+        <button id="stopCamera" class="secondary" disabled>Stop camera</button>
+      </div>
+      <p class="hint">The preview stays on this device in this starter version. No image is sent to an AI service.</p>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">VOICE INPUT</p><h2>Listen</h2></div>
+        <span id="listenStatus" class="status">Microphone off</span>
+      </div>
+      <div class="actions">
+        <button id="startListening" class="primary">Start listening</button>
+        <button id="stopListening" class="secondary" disabled>Stop listening</button>
+      </div>
+      <label for="heardText">Recognized speech</label>
+      <textarea id="heardText" rows="3" placeholder="Your recognized words will appear here…"></textarea>
+      <p id="speechSupport" class="hint" role="status">Checking speech recognition support…</p>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">VOICE OUTPUT</p><h2>Speak</h2></div>
+        <span class="status">Device speaker</span>
+      </div>
+      <label for="replyText">Text to speak</label>
+      <textarea id="replyText" rows="3" placeholder="Type something for the robot prototype to say…">Hello! I am your humanoid robot prototype.</textarea>
+      <div class="actions">
+        <button id="speak" class="primary">Speak aloud</button>
+        <button id="stopSpeaking" class="secondary">Stop speaking</button>
+      </div>
+    </section>
+
+    <aside class="notice">
+      <strong>Prototype status:</strong> Camera, browser speech recognition, and speech output only. ChatGPT is not connected yet.
+      <br><br>
+      Camera and microphone require your permission. Start them only when you want to test, and stop them afterward. API keys must never be placed in this website's code.
+    </aside>
+    <footer>CHATGPT HUMANOID R1 · Built step by step</footer>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
