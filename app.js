@@ -129,7 +129,8 @@ askAIButton.addEventListener("click", async () => {
         AI_SETUP_INCOMPLETE: "AI setup is still in progress. The project owner needs to complete the server configuration. Your camera, microphone, and speaker remain available.",
         INVALID_ACCESS_CODE: "Access code not recognised. Please check the code and try again.",
         TOO_MANY_REQUESTS: "Too many messages in a short time. Please wait one minute before trying again.",
-        AI_USAGE_LIMIT: "The AI service has reached its usage limit. The project owner needs to check API billing and usage limits.",
+        AI_USAGE_LIMIT: "Gemini's free-tier request or usage limit has been reached. Please wait and try again later.",
+        GEMINI_KEY_OR_ACCESS: "Gemini could not authorise this request. The project owner should check the API key and Gemini API access.",
         AI_PROVIDER_ERROR: "The AI service is temporarily unable to answer. Please try again shortly.",
         EMPTY_AI_RESPONSE: "The AI returned an empty answer. Please send your message again.",
         AI_CONNECTION_ERROR: "Unable to reach the AI service. Check your internet connection and try again."
