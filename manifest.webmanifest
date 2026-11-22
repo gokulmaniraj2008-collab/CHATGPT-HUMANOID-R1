@@ -1,9 +1,9 @@
 {
-  "name": "CHATGPT HUMANOID R1",
+  "name": "HUMANOID R1 — AI Companion",
   "short_name": "HUMANOID R1",
-  "description": "See, hear, and speak phone prototype",
+  "description": "A unified AI workspace for chat, voice and device vision.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#101827"
+  "background_color": "#100b1c",
+  "theme_color": "#171027"
 }
