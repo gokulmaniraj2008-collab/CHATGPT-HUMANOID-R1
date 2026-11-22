@@ -9,7 +9,7 @@ A phone-first prototype for a humanoid robot interface focused on **seeing, hear
 - Manual text input as a fallback when speech recognition is unavailable.
 
 ## Important current limitation
-This first prototype does **not** connect to ChatGPT yet. The camera preview stays on the device; it does not upload images. Speech recognition and speech output use browser capabilities where supported. A later phase will add a secure backend for AI requests.
+The project now includes a protected Vercel serverless endpoint at `api/chat.js` for **text-only** OpenAI Responses API requests. The camera preview still stays on the device and is not sent to AI. Speech recognition remains browser-provided. The AI endpoint requires two Vercel environment variables: `OPENAI_API_KEY` (secret OpenAI API key) and `HUMANOID_ACCESS_CODE` (a separate private access code entered in the app). Never commit either value to GitHub. The access-code check and in-memory per-IP throttle are basic prototype safeguards, not production-grade abuse prevention.
 
 ## Run
 Open `index.html` using a local development server or host the repository as a static website. Camera and microphone access generally require HTTPS (or localhost) and explicit browser permission. Android Chrome is the intended first test environment.
