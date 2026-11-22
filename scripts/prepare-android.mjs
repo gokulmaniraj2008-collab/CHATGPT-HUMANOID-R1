@@ -15,7 +15,8 @@ const declarations = [
   ...permissions.map((name) => `<uses-permission android:name="${name}" />`),
   ...optionalFeatures.map((name) => `<uses-feature android:name="${name}" android:required="false" />`)
 ];
-const rootEnd = manifest.indexOf(">");
+const rootStart = manifest.indexOf("<manifest");
+const rootEnd = rootStart < 0 ? -1 : manifest.indexOf(">", rootStart);
 if (rootEnd < 0) throw new Error("AndroidManifest.xml has no manifest root element.");
 const missing = declarations.filter((tag) => !manifest.includes(tag));
 if (missing.length) {
