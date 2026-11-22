@@ -93,57 +93,93 @@ document.querySelector("#stopSpeaking").addEventListener("click", () => window.s
 
 
 const askAIButton = document.querySelector("#askAI");
-const accessCodeInput = document.querySelector("#accessCode");
+const pairingPanel = document.querySelector("#devicePairing");
+const pairingCodeInput = document.querySelector("#pairingCode");
+const connectDeviceButton = document.querySelector("#connectDevice");
 const aiStatus = document.querySelector("#aiStatus");
 const aiHint = document.querySelector("#aiHint");
 const replyText = document.querySelector("#replyText");
+let deviceConnected = false;
 
+function setDeviceConnected(connected) {
+  deviceConnected = connected;
+  pairingPanel.hidden = connected;
+  aiStatus.textContent = connected ? "AI connected · device paired" : "Device not paired";
+  aiHint.textContent = connected
+    ? "This device is securely paired. AI requests connect automatically."
+    : "Connect this device once with your private pairing code. The code is not needed again while the session is valid.";
+}
+async function checkDeviceSession() {
+  try {
+    const response = await fetch("/api/session", { credentials: "same-origin" });
+    const data = await response.json();
+    setDeviceConnected(response.ok && data.authenticated === true);
+  } catch {
+    setDeviceConnected(false);
+    aiHint.textContent = "Could not check the secure device session. Check your connection and reload.";
+  }
+}
+connectDeviceButton.addEventListener("click", async () => {
+  const code = pairingCodeInput.value;
+  if (!code) { aiHint.textContent = "Enter your private pairing code once to connect this device."; pairingCodeInput.focus(); return; }
+  connectDeviceButton.disabled = true;
+  aiStatus.textContent = "Connecting device…";
+  aiHint.textContent = "Creating a secure device session…";
+  try {
+    const response = await fetch("/api/session", {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const messages = {
+        INVALID_PAIRING_CODE: "Pairing code not recognised. Please check it and try again.",
+        PAIR_RATE_LIMIT: "Too many pairing attempts. Wait one minute before trying again.",
+        SESSION_SETUP_INCOMPLETE: "Secure pairing is not configured on the server yet."
+      };
+      throw new Error(messages[data.errorCode] || data.error || "Could not pair this device.");
+    }
+    pairingCodeInput.value = "";
+    setDeviceConnected(true);
+  } catch (error) {
+    setDeviceConnected(false);
+    aiHint.textContent = error.message || "Could not connect this device.";
+  } finally { connectDeviceButton.disabled = false; }
+});
 askAIButton.addEventListener("click", async () => {
   const message = heardText.value.trim();
-  const accessCode = accessCodeInput.value;
-  if (!message) {
-    aiHint.textContent = "First speak into the microphone or type a message in Recognized speech.";
-    return;
-  }
-  if (!accessCode) {
-    aiHint.textContent = "Enter your private access code first.";
-    accessCodeInput.focus();
-    return;
-  }
-
+  if (!message) { aiHint.textContent = "First speak into the microphone or type a message in Recognized speech."; return; }
+  if (!deviceConnected) { aiHint.textContent = "Connect this device once before sending messages to AI."; pairingPanel.hidden = false; pairingCodeInput.focus(); return; }
   askAIButton.disabled = true;
   aiStatus.textContent = "Thinking…";
   aiHint.textContent = "Sending text securely to your Vercel backend…";
   try {
     const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-humanoid-access-code": accessCode
-      },
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, language: voiceLanguage.value })
     });
     const data = await response.json();
     if (!response.ok) {
       const messages = {
-        AI_SETUP_INCOMPLETE: "AI setup is still in progress. The project owner needs to complete the server configuration. Your camera, microphone, and speaker remain available.",
-        INVALID_ACCESS_CODE: "Access code not recognised. Please check the code and try again.",
-        TOO_MANY_REQUESTS: "Too many messages in a short time. Please wait one minute before trying again.",
+        AI_SETUP_INCOMPLETE: "AI setup is incomplete. Check the server environment settings.",
+        DEVICE_NOT_PAIRED: "Your device session expired. Pair this device again.",
+        TOO_MANY_REQUESTS: "Too many messages in a short time. Wait one minute before trying again.",
         AI_USAGE_LIMIT: "Gemini's free-tier request or usage limit has been reached. Please wait and try again later.",
         GEMINI_KEY_OR_ACCESS: "Gemini could not authorise this request. The project owner should check the API key and Gemini API access.",
         AI_PROVIDER_ERROR: "The AI service is temporarily unable to answer. Please try again shortly.",
         EMPTY_AI_RESPONSE: "The AI returned an empty answer. Please send your message again.",
         AI_CONNECTION_ERROR: "Unable to reach the AI service. Check your internet connection and try again."
       };
+      if (data.errorCode === "DEVICE_NOT_PAIRED") setDeviceConnected(false);
       throw new Error(messages[data.errorCode] || data.error || "Something went wrong while contacting the AI. Please try again.");
     }
     replyText.value = data.reply;
     aiStatus.textContent = "AI connected";
     aiHint.textContent = "AI replied. Tap Speak aloud below to hear the answer.";
   } catch (error) {
-    aiStatus.textContent = "Not connected";
+    aiStatus.textContent = deviceConnected ? "AI temporarily unavailable" : "Device not paired";
     aiHint.textContent = error.message || "Could not contact the AI backend.";
-  } finally {
-    askAIButton.disabled = false;
-  }
+  } finally { askAIButton.disabled = false; }
 });
+checkDeviceSession();
