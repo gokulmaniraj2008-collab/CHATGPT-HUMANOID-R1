@@ -16,7 +16,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 10;
 const requestsByIp = new Map();
 const PRIMARY_MODEL = "gemini-3.8-flash";
-const FALLBACK_MODEL = "gemini-3.6-flash";
+const FALLBACK_MODEL = "gemini-3.5-flash-lite";
 const TRANSIENT_UPSTREAM_STATUSES = new Set([408, 500, 502, 503, 504]);
 const REQUEST_TIMEOUT_MS = 12_000;
 

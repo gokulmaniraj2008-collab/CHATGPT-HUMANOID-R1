@@ -6,6 +6,7 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - "scripts/**"
+      - "android-res/**"
       - ".github/workflows/android-apk.yml"
       - "docs/ANDROID_APP.md"
   workflow_dispatch:
@@ -50,6 +51,9 @@ jobs:
 
       - name: Sync Capacitor Android project
         run: npx cap sync android
+
+      - name: Apply app icon and Android media permissions
+        run: node scripts/prepare-android.mjs
 
       - name: Build debug APK
         working-directory: android

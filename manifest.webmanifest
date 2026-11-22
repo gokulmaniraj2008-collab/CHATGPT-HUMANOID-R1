@@ -5,5 +5,13 @@
   "start_url": "./",
   "display": "standalone",
   "background_color": "#100b1c",
-  "theme_color": "#171027"
+  "theme_color": "#171027",
+  "icons": [
+    {
+      "src": "./assets/humanoid-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
