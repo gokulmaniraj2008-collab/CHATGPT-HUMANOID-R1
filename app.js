@@ -17,7 +17,7 @@ function setDeviceConnected(connected){
   deviceConnected=connected;
   pairingPanel.hidden=connected;
   aiStatus.textContent=connected?"Device paired":"Device not paired";
-  $("#deviceSummary").textContent=connected?"Secure session active":"Pair this device to use Gemini";
+  $("#deviceSummary").textContent=connected?"Secure session active":"Pair this device to use AI assistant";
   $("#deviceDot").classList.toggle("online",connected);
   aiHint.textContent=connected?"Connected securely. Your messages are ready to send.":"Pair this device once in Device settings to start chatting.";
 }
@@ -64,7 +64,7 @@ async function sendMessage(){
   if(!message){aiHint.textContent="Type a message or use the microphone first.";heardText.focus();return;}
   if(!deviceConnected){aiHint.textContent="Pair this device once before sending messages.";showDrawer("pairing");return;}
   addMessage("user",message);heardText.value="";heardText.style.height="auto";
-  askAIButton.disabled=true;thinking.hidden=false;aiStatus.textContent="Thinking…";aiHint.textContent="Sending your message securely to Gemini…";conversation.scrollTop=conversation.scrollHeight;
+  askAIButton.disabled=true;thinking.hidden=false;aiStatus.textContent="Thinking…";aiHint.textContent="Sending your message securely to AI assistant…";conversation.scrollTop=conversation.scrollHeight;
   try{
     const response=await fetch("/api/chat",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,language:voiceLanguage.value})});
     const data=await response.json();
@@ -73,17 +73,17 @@ async function sendMessage(){
         AI_SETUP_INCOMPLETE:"AI setup is incomplete. Check the server environment settings.",
         DEVICE_NOT_PAIRED:"Your device session expired. Pair this device again.",
         TOO_MANY_REQUESTS:"Too many messages in a short time. Wait before trying again.",
-        AI_USAGE_LIMIT:"Gemini's free-tier usage limit has been reached. Wait and try again later.",
-        GEMINI_KEY_OR_ACCESS:"Gemini could not authorise this request. The project owner should check the API configuration.",
+        AI_USAGE_LIMIT:"AI assistant's free-tier usage limit has been reached. Wait and try again later.",
+        GEMINI_KEY_OR_ACCESS:"AI assistant could not authorise this request. The project owner should check the API configuration.",
         AI_PROVIDER_ERROR:"The AI service is temporarily unavailable. Please try again shortly.",
-        EMPTY_AI_RESPONSE:"Gemini returned an empty answer. Please try again.",
+        EMPTY_AI_RESPONSE:"AI assistant returned an empty answer. Please try again.",
         AI_CONNECTION_ERROR:"Unable to reach the AI service. Check your internet connection."
       };
       if(data.errorCode==="DEVICE_NOT_PAIRED")setDeviceConnected(false);
-      throw new Error(messages[data.errorCode]||data.error||"Something went wrong while contacting Gemini.");
+      throw new Error(messages[data.errorCode]||data.error||"Something went wrong while contacting AI assistant.");
     }
     lastReply=data.reply||"";replyText.value=lastReply;addMessage("assistant",lastReply);
-    aiStatus.textContent="Gemini replied";aiHint.textContent="Reply received. Use Speak last reply to hear it.";
+    aiStatus.textContent="AI assistant replied";aiHint.textContent="Reply received. Use Speak last reply to hear it.";
   }catch(error){addMessage("assistant","I couldn't complete that request. "+(error.message||"Please try again."));aiStatus.textContent=deviceConnected?"AI unavailable":"Device not paired";aiHint.textContent=error.message||"Could not contact the AI backend.";}
   finally{thinking.hidden=true;askAIButton.disabled=false;conversation.scrollTop=conversation.scrollHeight;}
 }
