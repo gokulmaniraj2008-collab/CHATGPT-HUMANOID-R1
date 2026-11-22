@@ -1,0 +1,9 @@
+{
+  "appId": "com.gokulmaniraj.humanoidr1",
+  "appName": "HUMANOID R1",
+  "webDir": "www",
+  "server": {
+    "url": "https://chatgpt-humanoid-r1.vercel.app",
+    "cleartext": false
+  }
+}
