@@ -2,92 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <meta name="description" content="CHATGPT HUMANOID R1 — see, hear, and speak prototype">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171027">
+  <meta name="description" content="HUMANOID R1 — your unified AI companion for chat, voice and vision.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css">
-  <title>CHATGPT HUMANOID R1</title>
+  <title>HUMANOID R1 · AI Companion</title>
 </head>
 <body>
-  <main class="shell">
-    <header class="top">
-      <div class="mark" aria-hidden="true">R1</div>
-      <div>
-        <p class="eyebrow">PHONE PROTOTYPE · PHASE 1</p>
-        <h1>CHATGPT HUMANOID R1</h1>
-        <p class="subtitle">See · Hear · Speak</p>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="./" aria-label="HUMANOID R1 home">
+        <span class="brand-mark">H</span><span><strong>HUMANOID</strong><small>R1 · AI COMPANION</small></span>
+      </a>
+      <button id="newChat" class="new-chat"><span>＋</span> New chat</button>
+      <p class="nav-label">WORKSPACE</p>
+      <button class="nav-item active" id="chatNav"><span>▤</span> Chat</button>
+      <button class="nav-item" id="visionNav"><span>◉</span> Vision & camera</button>
+      <button class="nav-item" id="voiceNav"><span>♫</span> Voice studio</button>
+      <div class="sidebar-spacer"></div>
+      <div class="device-card">
+        <div class="device-card-top"><span class="device-dot" id="deviceDot"></span><strong>Device status</strong></div>
+        <p id="deviceSummary">Checking secure session…</p>
+        <button id="openPairing" class="text-button">Device settings →</button>
       </div>
-    </header>
-
-    <section class="panel camera-panel">
-      <div class="section-heading">
-        <div><p class="eyebrow">VISION</p><h2>Camera</h2></div>
-        <span id="cameraStatus" class="status">Camera off</span>
-      </div>
-      <video id="cameraPreview" autoplay playsinline muted></video>
-      <div class="actions">
-        <button id="startCamera" class="primary">Start camera</button>
-        <button id="stopCamera" class="secondary" disabled>Stop camera</button>
-      </div>
-      <p class="hint">The preview stays on this device in this starter version. No image is sent to an AI service.</p>
-    </section>
-
-    <section class="panel">
-      <div class="section-heading">
-        <div><p class="eyebrow">VOICE INPUT</p><h2>Listen</h2></div>
-        <span id="listenStatus" class="status">Microphone off</span>
-      </div>
-      <label for="voiceLanguage">Voice language</label>
-      <select id="voiceLanguage" class="language-select">
-        <option value="ta-IN" selected>Tamil</option>
-        <option value="en-IN">English (India)</option>
-        <option value="hi-IN">Hindi</option>
-      </select>
-      <div class="actions">
-        <button id="startListening" class="primary">Start listening</button>
-        <button id="stopListening" class="secondary" disabled>Stop listening</button>
-      </div>
-      <label for="heardText">Recognized speech</label>
-      <textarea id="heardText" rows="3" placeholder="Your recognized words will appear here…"></textarea>
-      <p id="speechSupport" class="hint" role="status">Checking speech recognition support…</p>
-    </section>
-
-    <section class="panel">
-      <div class="section-heading">
-        <div><p class="eyebrow">AI BRAIN · TEXT FIRST</p><h2>Gemini AI</h2></div>
-        <span id="aiStatus" class="status">Not connected</span>
-      </div>
-      <div id="devicePairing">
-        <label for="pairingCode">One-time private device pairing code</label>
-        <input id="pairingCode" class="language-select" type="password" autocomplete="current-password" placeholder="Enter your private pairing code">
-        <div class="actions"><button id="connectDevice" class="primary">Connect this device</button></div>
-        <p class="hint">Enter the existing private code once on this device. A secure 30-day session will be stored in an HttpOnly cookie. The code is not your Gemini API key.</p>
-      </div>
-      <div class="actions"><button id="askAI" class="primary">Send recognized text to AI</button></div>
-      <p id="aiHint" class="hint" role="status">Checking your secure device session…</p>
-    </section>
-
-    <section class="panel">
-      <div class="section-heading">
-        <div><p class="eyebrow">VOICE OUTPUT</p><h2>Speak</h2></div>
-        <span class="status">Device speaker</span>
-      </div>
-      <label for="replyText">Text to speak</label>
-      <textarea id="replyText" rows="3" placeholder="Type something for the robot prototype to say…">Hello! I am your humanoid robot prototype.</textarea>
-      <div class="actions">
-        <button id="speak" class="primary">Speak aloud</button>
-        <button id="stopSpeaking" class="secondary">Stop speaking</button>
-      </div>
-    </section>
-
-    <aside class="notice">
-      <strong>Prototype status:</strong> Camera, browser speech recognition, speech output, and a text-only AI connection panel. The AI panel uses a secure device session after one-time pairing.
-      <br><br>
-      Camera and microphone require your permission. Start them only when you want to test, and stop them afterward. Gemini API keys stay on the Vercel server. Camera frames are not sent to AI in this phase.
+      <div class="profile-row"><div class="avatar">R1</div><div><strong>Personal workspace</strong><small>Local device</small></div></div>
     </aside>
-    <footer>CHATGPT HUMANOID R1 · Built step by step</footer>
-  </main>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button id="menuToggle" class="icon-button mobile-menu" aria-label="Open navigation">☰</button>
+        <div class="topbar-title"><span class="live-dot"></span><span>AI Workspace</span><span class="model-pill">Gemini</span></div>
+        <button id="settingsButton" class="icon-button" aria-label="Open device settings">⚙</button>
+      </header>
+
+      <section class="chat-layout" id="chatSection">
+        <div class="conversation" id="conversation">
+          <div class="welcome" id="welcome">
+            <div class="welcome-orb"><span>H</span></div>
+            <p class="eyebrow">YOUR PERSONAL AI COMPANION</p>
+            <h1>What shall we<br><span>work on today?</span></h1>
+            <p class="welcome-copy">Chat, speak, or bring your camera into the conversation.</p>
+            <div class="suggestion-grid">
+              <button class="suggestion" data-prompt="Explain how a humanoid robot works."><span>✦</span><strong>Explore an idea</strong><small>Learn something new</small></button>
+              <button class="suggestion" data-prompt="Help me plan the next development steps for HUMANOID R1."><span>⌘</span><strong>Build a project</strong><small>Plan your next steps</small></button>
+              <button class="suggestion" data-prompt="Give me a short Tamil and English speaking practice exercise."><span>♫</span><strong>Practice speaking</strong><small>Use voice with AI</small></button>
+              <button class="suggestion" data-prompt="What can I do with the camera and vision features?"><span>◉</span><strong>Try vision</strong><small>Explore camera tools</small></button>
+            </div>
+          </div>
+          <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+          <div id="thinking" class="thinking" hidden><span></span><span></span><span></span><small>HUMANOID is thinking</small></div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="tool-row">
+            <button id="cameraTool" class="tool-chip"><span>◉</span> Camera</button>
+            <button id="voiceTool" class="tool-chip"><span>♫</span> Voice input</button>
+            <span class="tool-note" id="aiHint" role="status">Checking your secure device session…</span>
+          </div>
+          <div class="composer">
+            <textarea id="heardText" rows="1" placeholder="Message HUMANOID…" aria-label="Message HUMANOID"></textarea>
+            <div class="composer-actions">
+              <button id="startListening" class="round-tool" aria-label="Start microphone">🎙</button>
+              <button id="askAI" class="send-button" aria-label="Send message">↑</button>
+            </div>
+          </div>
+          <p class="composer-footnote">HUMANOID can make mistakes. Check important information.</p>
+        </div>
+      </section>
+
+      <section class="tools-drawer" id="toolsDrawer" hidden>
+        <div class="drawer-heading"><div><p class="eyebrow">DEVICE TOOLS</p><h2 id="drawerTitle">Vision & camera</h2></div><button id="closeDrawer" class="icon-button" aria-label="Close tools">×</button></div>
+        <div class="tool-panel" id="cameraPanel">
+          <div class="section-heading"><div><h3>Camera preview</h3><p class="muted">Preview stays on this device in this version.</p></div><span id="cameraStatus" class="status">Camera off</span></div>
+          <video id="cameraPreview" autoplay playsinline muted></video>
+          <div class="button-row"><button id="startCamera" class="primary-button">Start camera</button><button id="stopCamera" class="secondary-button" disabled>Stop camera</button></div>
+          <p class="hint">Camera frames are not sent to Gemini yet. AI vision requires a separate secure image-upload integration.</p>
+        </div>
+        <div class="tool-panel" id="voicePanel">
+          <div class="section-heading"><div><h3>Voice studio</h3><p class="muted">Speech recognition and spoken replies</p></div><span id="listenStatus" class="status">Microphone off</span></div>
+          <label for="voiceLanguage">Voice language</label>
+          <select id="voiceLanguage" class="field"><option value="ta-IN" selected>Tamil</option><option value="en-IN">English (India)</option><option value="hi-IN">Hindi</option></select>
+          <div class="button-row"><button id="stopListening" class="secondary-button" disabled>Stop listening</button><button id="speak" class="primary-button">Speak last reply</button><button id="stopSpeaking" class="secondary-button">Stop speaking</button></div>
+          <textarea id="replyText" rows="3" placeholder="AI reply will appear here…" aria-label="Last AI reply"></textarea>
+          <p id="speechSupport" class="hint" role="status">Checking speech recognition support…</p>
+        </div>
+        <div class="tool-panel" id="pairingPanel">
+          <div class="section-heading"><div><h3>Secure device pairing</h3><p class="muted">Pair once; the secure session is reused automatically.</p></div><span id="aiStatus" class="status">Not connected</span></div>
+          <div id="devicePairing"><label for="pairingCode">One-time private pairing code</label><input id="pairingCode" class="field" type="password" autocomplete="current-password" placeholder="Enter your private pairing code"><div class="button-row"><button id="connectDevice" class="primary-button">Connect this device</button></div><p class="hint">This is your private device code, not your Gemini API key. Never share it in chat.</p></div>
+          <p class="hint">Gemini API credentials remain on the server. Your device session uses a secure HttpOnly cookie.</p>
+        </div>
+      </section>
+      <footer class="app-footer">HUMANOID R1 <span>·</span> Built for your device</footer>
+    </main>
+  </div>
+  <div class="mobile-backdrop" id="mobileBackdrop" hidden></div>
   <script src="./app.js"></script>
 </body>
 </html>
