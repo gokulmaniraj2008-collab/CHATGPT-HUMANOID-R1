@@ -74,7 +74,7 @@ async function sendMessage(){
         DEVICE_NOT_PAIRED:"Your device session expired. Pair this device again.",
         TOO_MANY_REQUESTS:"Too many messages in a short time. Wait before trying again.",
         AI_USAGE_LIMIT:"AI assistant's free-tier usage limit has been reached. Wait and try again later.",
-        GEMINI_KEY_OR_ACCESS:"AI assistant could not authorise this request. The project owner should check the API configuration.",
+        AI_KEY_OR_ACCESS:"AI assistant could not authorise this request. The project owner should check the API configuration.",
         AI_PROVIDER_ERROR:"The AI service is temporarily unavailable. Please try again shortly.",
         EMPTY_AI_RESPONSE:"AI assistant returned an empty answer. Please try again.",
         AI_CONNECTION_ERROR:"Unable to reach the AI service. Check your internet connection."
