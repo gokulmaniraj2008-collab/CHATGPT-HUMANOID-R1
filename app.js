@@ -90,3 +90,48 @@ document.querySelector("#speak").addEventListener("click", () => {
   window.speechSynthesis.speak(utterance);
 });
 document.querySelector("#stopSpeaking").addEventListener("click", () => window.speechSynthesis?.cancel());
+
+
+const askAIButton = document.querySelector("#askAI");
+const accessCodeInput = document.querySelector("#accessCode");
+const aiStatus = document.querySelector("#aiStatus");
+const aiHint = document.querySelector("#aiHint");
+const replyText = document.querySelector("#replyText");
+
+askAIButton.addEventListener("click", async () => {
+  const message = heardText.value.trim();
+  const accessCode = accessCodeInput.value;
+  if (!message) {
+    aiHint.textContent = "First speak into the microphone or type a message in Recognized speech.";
+    return;
+  }
+  if (!accessCode) {
+    aiHint.textContent = "Enter your private access code first.";
+    accessCodeInput.focus();
+    return;
+  }
+
+  askAIButton.disabled = true;
+  aiStatus.textContent = "Thinking…";
+  aiHint.textContent = "Sending text securely to your Vercel backend…";
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-humanoid-access-code": accessCode
+      },
+      body: JSON.stringify({ message, language: voiceLanguage.value })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "AI request failed.");
+    replyText.value = data.reply;
+    aiStatus.textContent = "AI connected";
+    aiHint.textContent = "AI replied. Tap Speak aloud below to hear the answer.";
+  } catch (error) {
+    aiStatus.textContent = "Not connected";
+    aiHint.textContent = error.message || "Could not contact the AI backend.";
+  } finally {
+    askAIButton.disabled = false;
+  }
+});
