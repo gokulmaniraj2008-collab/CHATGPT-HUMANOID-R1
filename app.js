@@ -124,7 +124,18 @@ askAIButton.addEventListener("click", async () => {
       body: JSON.stringify({ message, language: voiceLanguage.value })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "AI request failed.");
+    if (!response.ok) {
+      const messages = {
+        AI_SETUP_INCOMPLETE: "AI setup is still in progress. The project owner needs to complete the server configuration. Your camera, microphone, and speaker remain available.",
+        INVALID_ACCESS_CODE: "Access code not recognised. Please check the code and try again.",
+        TOO_MANY_REQUESTS: "Too many messages in a short time. Please wait one minute before trying again.",
+        AI_USAGE_LIMIT: "The AI service has reached its usage limit. The project owner needs to check API billing and usage limits.",
+        AI_PROVIDER_ERROR: "The AI service is temporarily unable to answer. Please try again shortly.",
+        EMPTY_AI_RESPONSE: "The AI returned an empty answer. Please send your message again.",
+        AI_CONNECTION_ERROR: "Unable to reach the AI service. Check your internet connection and try again."
+      };
+      throw new Error(messages[data.errorCode] || data.error || "Something went wrong while contacting the AI. Please try again.");
+    }
     replyText.value = data.reply;
     aiStatus.textContent = "AI connected";
     aiHint.textContent = "AI replied. Tap Speak aloud below to hear the answer.";
