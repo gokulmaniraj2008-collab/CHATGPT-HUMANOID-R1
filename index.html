@@ -58,13 +58,14 @@
         <div><p class="eyebrow">AI BRAIN · TEXT FIRST</p><h2>Gemini AI</h2></div>
         <span id="aiStatus" class="status">Not connected</span>
       </div>
-      <label for="accessCode">Private access code</label>
-      <input id="accessCode" class="language-select" type="password" autocomplete="off" placeholder="Enter your private access code">
-      <p class="hint">This code is a separate protection for your personal prototype. Do not share it. It is not your OpenAI API key.</p>
-      <div class="actions">
-        <button id="askAI" class="primary">Send recognized text to AI</button>
+      <div id="devicePairing">
+        <label for="pairingCode">One-time private device pairing code</label>
+        <input id="pairingCode" class="language-select" type="password" autocomplete="current-password" placeholder="Enter your private pairing code">
+        <div class="actions"><button id="connectDevice" class="primary">Connect this device</button></div>
+        <p class="hint">Enter the existing private code once on this device. A secure 30-day session will be stored in an HttpOnly cookie. The code is not your Gemini API key.</p>
       </div>
-      <p id="aiHint" class="hint" role="status">AI is not configured yet. Your camera and microphone are not sent to AI in this phase.</p>
+      <div class="actions"><button id="askAI" class="primary">Send recognized text to AI</button></div>
+      <p id="aiHint" class="hint" role="status">Checking your secure device session…</p>
     </section>
 
     <section class="panel">
@@ -81,9 +82,9 @@
     </section>
 
     <aside class="notice">
-      <strong>Prototype status:</strong> Camera, browser speech recognition, speech output, and a text-only AI connection panel. The AI panel works only after the project owner configures its Vercel secrets.
+      <strong>Prototype status:</strong> Camera, browser speech recognition, speech output, and a text-only AI connection panel. The AI panel uses a secure device session after one-time pairing.
       <br><br>
-      Camera and microphone require your permission. Start them only when you want to test, and stop them afterward. Gemini API keys must never be placed in this website's code. Camera frames are not sent to AI in this phase.
+      Camera and microphone require your permission. Start them only when you want to test, and stop them afterward. Gemini API keys stay on the Vercel server. Camera frames are not sent to AI in this phase.
     </aside>
     <footer>CHATGPT HUMANOID R1 · Built step by step</footer>
   </main>

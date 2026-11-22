@@ -1,4 +1,16 @@
-const { timingSafeEqual } = require("node:crypto");
+const { createHmac, timingSafeEqual } = require("node:crypto");
+
+function hasDeviceSession(req, secret) {
+  if (!secret) return false;
+  const part = String(req.headers.cookie || "").split(";").map(x => x.trim()).find(x => x.startsWith("humanoid_session="));
+  if (!part) return false;
+  const [payload, signature, extra] = decodeURIComponent(part.slice("humanoid_session=".length)).split(".");
+  if (!payload || !signature || extra) return false;
+  const expected = Buffer.from(createHmac("sha256", secret).update(payload).digest("base64url"));
+  const supplied = Buffer.from(signature);
+  if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return false;
+  try { return JSON.parse(Buffer.from(payload, "base64url").toString()).exp > Date.now(); } catch { return false; }
+}
 
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 10;
@@ -61,19 +73,16 @@ module.exports = async function handler(req, res) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
-  const accessCode = process.env.HUMANOID_ACCESS_CODE;
-  if (!apiKey || !accessCode) {
+  const sessionSecret = process.env.HUMANOID_SESSION_SECRET;
+  if (!apiKey || !sessionSecret) {
     return send(res, 503, {
       errorCode: "AI_SETUP_INCOMPLETE",
       error: "AI is not ready yet. The project owner needs to finish the server setup. Your camera, microphone, and speaker features are still available."
     });
   }
 
-  const suppliedCode = req.headers["x-humanoid-access-code"] || "";
-  const expected = Buffer.from(accessCode);
-  const supplied = Buffer.from(String(suppliedCode));
-  if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) {
-    return send(res, 401, { errorCode: "INVALID_ACCESS_CODE", error: "That access code doesn't match. Check it and try again." });
+  if (!hasDeviceSession(req, sessionSecret)) {
+    return send(res, 401, { errorCode: "DEVICE_NOT_PAIRED", error: "Connect this device once before sending messages to AI." });
   }
 
   const forwardedFor = req.headers["x-forwarded-for"] || "unknown";
