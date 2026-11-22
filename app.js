@@ -120,6 +120,7 @@ connectDeviceButton.addEventListener("click",async()=>{
 });
 
 startCamera.addEventListener("click",async()=>{
+  if(!window.confirm("HUMANOID R1 needs camera access only to show a live preview on this device. Continue?"))return;
   if(!navigator.mediaDevices?.getUserMedia){cameraStatus.textContent="Camera unavailable";return;}
   try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});cameraPreview.srcObject=cameraStream;cameraStatus.textContent="Camera on";startCamera.disabled=true;stopCamera.disabled=false;}
   catch(error){cameraStatus.textContent=error.name==="NotAllowedError"?"Permission denied":"Camera error";}
@@ -136,7 +137,7 @@ if(SpeechRecognition){
   recognition.onend=()=>{listenStatus.textContent="Microphone off";startListening.disabled=false;stopListening.disabled=true;};
   speechSupport.textContent="Speech recognition is available. Select a language and tap the microphone.";
 }else{startListening.disabled=true;stopListening.disabled=true;speechSupport.textContent="Speech recognition is not supported in this browser. You can still type messages.";}
-function startMic(){if(!recognition){showDrawer("voice");return;}try{recognition.lang=voiceLanguage.value;recognition.start();showChat();}catch{listenStatus.textContent="Already listening";}}
+function startMic(){if(!recognition){showDrawer("voice");return;}if(!window.confirm("HUMANOID R1 needs microphone access only while you use voice input. Continue?"))return;try{recognition.lang=voiceLanguage.value;recognition.start();showChat();}catch{listenStatus.textContent="Already listening";}}
 startListening.addEventListener("click",startMic);
 $("#voiceTool").addEventListener("dblclick",startMic);
 stopListening.addEventListener("click",()=>recognition?.stop());
