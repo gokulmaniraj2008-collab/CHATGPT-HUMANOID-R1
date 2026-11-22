@@ -18,7 +18,8 @@ module.exports = async function handler(req, res) {
   const accessCode = process.env.HUMANOID_ACCESS_CODE;
   if (!apiKey || !accessCode) {
     return send(res, 503, {
-      error: "AI setup is incomplete. The project owner must configure the server environment variables."
+      errorCode: "AI_SETUP_INCOMPLETE",
+      error: "AI is not ready yet. The project owner needs to finish the server setup. Your camera, microphone, and speaker features are still available."
     });
   }
 
@@ -26,7 +27,10 @@ module.exports = async function handler(req, res) {
   const expected = Buffer.from(accessCode);
   const supplied = Buffer.from(String(suppliedCode));
   if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) {
-    return send(res, 401, { error: "Access code is incorrect." });
+    return send(res, 401, {
+      errorCode: "INVALID_ACCESS_CODE",
+      error: "That access code doesn't match. Check it and try again."
+    });
   }
 
   const forwardedFor = req.headers["x-forwarded-for"] || "unknown";
@@ -34,7 +38,10 @@ module.exports = async function handler(req, res) {
   const now = Date.now();
   const previous = requestsByIp.get(ip);
   if (previous && now - previous.startedAt < WINDOW_MS && previous.count >= MAX_REQUESTS_PER_WINDOW) {
-    return send(res, 429, { error: "Too many requests. Wait one minute and try again." });
+    return send(res, 429, {
+      errorCode: "TOO_MANY_REQUESTS",
+      error: "You're sending messages too quickly. Please wait about a minute, then try again."
+    });
   }
   if (!previous || now - previous.startedAt >= WINDOW_MS) {
     requestsByIp.set(ip, { startedAt: now, count: 1 });
@@ -72,17 +79,24 @@ module.exports = async function handler(req, res) {
     if (!upstream.ok) {
       console.error("OpenAI API error:", upstream.status, data?.error?.type || "unknown");
       return send(res, upstream.status === 429 ? 429 : 502, {
+        errorCode: upstream.status === 429 ? "AI_USAGE_LIMIT" : "AI_PROVIDER_ERROR",
         error: upstream.status === 429
-          ? "OpenAI API quota or rate limit reached. Check API billing and limits."
-          : "The AI service could not complete the request. Try again shortly."
+          ? "The AI service has reached its usage limit. The project owner should check API billing and usage limits."
+          : "The AI service couldn't process that message right now. Please try again in a moment."
       });
     }
 
     const answer = typeof data.output_text === "string" ? data.output_text.trim() : "";
-    if (!answer) return send(res, 502, { error: "The AI returned an empty response. Please try again." });
+    if (!answer) return send(res, 502, {
+      errorCode: "EMPTY_AI_RESPONSE",
+      error: "The AI didn't return an answer. Please try sending your message again."
+    });
     return send(res, 200, { reply: answer });
   } catch (error) {
     console.error("AI request failed:", error?.message || "unknown error");
-    return send(res, 502, { error: "Could not reach the AI service. Check your connection and try again." });
+    return send(res, 502, {
+      errorCode: "AI_CONNECTION_ERROR",
+      error: "We couldn't connect to the AI service. Check your internet connection and try again."
+    });
   }
 };
