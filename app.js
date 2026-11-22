@@ -104,7 +104,7 @@ async function sendMessage(retryMessage=null){
   }catch(error){addErrorMessage("I couldn't complete that request. "+(error.message||"Please try again."),retryableFailure?message:null);aiStatus.textContent=deviceConnected?"AI unavailable":"Device not paired";aiHint.textContent=error.message||"Could not contact the AI backend.";}
   finally{thinking.hidden=true;askAIButton.disabled=false;conversation.scrollTop=conversation.scrollHeight;}
 }
-askAIButton.addEventListener("click",sendMessage);
+askAIButton.addEventListener("click",()=>sendMessage());
 
 connectDeviceButton.addEventListener("click",async()=>{
   const code=pairingCodeInput.value;
