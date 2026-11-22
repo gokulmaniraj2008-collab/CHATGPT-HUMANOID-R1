@@ -6,6 +6,7 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - "scripts/**"
+      - "android-res/**"
       - ".github/workflows/android-apk.yml"
       - "docs/ANDROID_APP.md"
   workflow_dispatch:
