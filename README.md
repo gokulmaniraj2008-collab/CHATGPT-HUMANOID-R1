@@ -18,7 +18,7 @@ Android phone / browser
   Microphone -> browser speech recognition -> recognized text
   Text input -> app.js
                 |
-                | POST /api/chat + private access-code header
+                | POST /api/chat + signed HttpOnly device-session cookie
                 v
           Vercel serverless API
           api/chat.js
@@ -42,7 +42,7 @@ Required Vercel environment variables:
 | Variable | Purpose |
 | --- | --- |
 | `GEMINI_API_KEY` | Secret API key created in Google AI Studio. Read only by the Vercel serverless function. |
-| `HUMANOID_ACCESS_CODE` | Private access code entered in the website's AI panel. Keep the existing value when migrating providers. |
+| `HUMANOID_ACCESS_CODE` | Existing private code used only for first-time device pairing. |\n| `HUMANOID_SESSION_SECRET` | Long random secret used to sign 30-day device sessions. |
 
 Do not put either value in `app.js`, `index.html`, other frontend files, or Git commits. Do not share secrets in screenshots or chat. The previous `OPENAI_API_KEY` is no longer read by the Gemini backend.
 
@@ -57,7 +57,7 @@ The project uses browser APIs and a Vercel serverless function. Opening `index.h
 - Gemini API free-tier availability, models, and request limits depend on the Google AI Studio project and Google's current terms. Free use is not unlimited or guaranteed.
 - ChatGPT subscription access does not include OpenAI API credits; this project currently uses Gemini instead.
 - Check the applicable Google AI Studio data-use and privacy terms before sending personal or sensitive information.
-- The app includes a simple in-memory per-IP request throttle and access-code check. These are prototype safeguards, not production-grade authentication or abuse prevention. Serverless instances may not share in-memory counters.
+- The app uses a signed, HttpOnly, Secure, SameSite=Strict cookie after one-time pairing. Its in-memory per-IP throttles are prototype safeguards, not production-grade authentication or abuse prevention. Serverless instances may not share in-memory counters.
 
 ## Privacy and safety
 
