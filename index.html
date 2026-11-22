@@ -55,6 +55,20 @@
 
     <section class="panel">
       <div class="section-heading">
+        <div><p class="eyebrow">AI BRAIN · TEXT FIRST</p><h2>ChatGPT AI</h2></div>
+        <span id="aiStatus" class="status">Not connected</span>
+      </div>
+      <label for="accessCode">Private access code</label>
+      <input id="accessCode" class="language-select" type="password" autocomplete="off" placeholder="Enter your private access code">
+      <p class="hint">This code is a separate protection for your personal prototype. Do not share it. It is not your OpenAI API key.</p>
+      <div class="actions">
+        <button id="askAI" class="primary">Send recognized text to AI</button>
+      </div>
+      <p id="aiHint" class="hint" role="status">AI is not configured yet. Your camera and microphone are not sent to AI in this phase.</p>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
         <div><p class="eyebrow">VOICE OUTPUT</p><h2>Speak</h2></div>
         <span class="status">Device speaker</span>
       </div>
