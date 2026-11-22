@@ -53,18 +53,33 @@ function addMessage(role,text){
   const bubble=document.createElement("div");bubble.className="message-content";bubble.textContent=text;row.appendChild(bubble);
   chatMessages.appendChild(row);conversation.scrollTop=conversation.scrollHeight;
 }
+function addErrorMessage(text,retryMessage){
+  welcome.hidden=true;
+  const row=document.createElement("div");row.className="message assistant error-message";
+  const avatar=document.createElement("div");avatar.className="message-avatar";avatar.textContent="H";row.appendChild(avatar);
+  const content=document.createElement("div");content.className="error-content";
+  const bubble=document.createElement("div");bubble.className="message-content";bubble.textContent=text;content.appendChild(bubble);
+  if(retryMessage){
+    const retry=document.createElement("button");retry.type="button";retry.className="retry-button";retry.textContent="↻ Try again";
+    retry.addEventListener("click",()=>{retry.disabled=true;row.remove();sendMessage(retryMessage);});
+    content.appendChild(retry);
+  }
+  row.appendChild(content);chatMessages.appendChild(row);conversation.scrollTop=conversation.scrollHeight;
+}
 function clearConversation(){chatMessages.replaceChildren();welcome.hidden=false;heardText.value="";replyText.value="";lastReply="";showChat();heardText.focus();}
 $("#newChat").addEventListener("click",clearConversation);
 document.querySelectorAll(".suggestion").forEach(button=>button.addEventListener("click",()=>{heardText.value=button.dataset.prompt||"";heardText.focus();}));
 heardText.addEventListener("input",()=>{heardText.style.height="auto";heardText.style.height=Math.min(heardText.scrollHeight,160)+"px";});
 heardText.addEventListener("keydown",event=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();askAIButton.click();}});
 
-async function sendMessage(){
-  const message=heardText.value.trim();
+async function sendMessage(retryMessage=null){
+  const message=(retryMessage||heardText.value).trim();
   if(!message){aiHint.textContent="Type a message or use the microphone first.";heardText.focus();return;}
   if(!deviceConnected){aiHint.textContent="Pair this device once before sending messages.";showDrawer("pairing");return;}
-  addMessage("user",message);heardText.value="";heardText.style.height="auto";
+  if(!retryMessage)addMessage("user",message);
+  heardText.value="";heardText.style.height="auto";
   askAIButton.disabled=true;thinking.hidden=false;aiStatus.textContent="Thinking…";aiHint.textContent="Sending your message securely to AI assistant…";conversation.scrollTop=conversation.scrollHeight;
+  let retryableFailure=false;
   try{
     const response=await fetch("/api/chat",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,language:voiceLanguage.value})});
     const data=await response.json();
@@ -75,16 +90,19 @@ async function sendMessage(){
         TOO_MANY_REQUESTS:"Too many messages in a short time. Wait before trying again.",
         AI_USAGE_LIMIT:"AI assistant's free-tier usage limit has been reached. Wait and try again later.",
         AI_KEY_OR_ACCESS:"AI assistant could not authorise this request. The project owner should check the API configuration.",
-        AI_PROVIDER_ERROR:"The AI service is temporarily unavailable. Please try again shortly.",
+        AI_PROVIDER_ERROR:"The AI provider is temporarily overloaded (503). Your message is safe. Please try again in a moment.",
+        AI_TIMEOUT:"The AI service took too long to respond. Your message is safe. Please try again.",
+        AI_CONNECTION_ERROR:"The AI service could not be reached. Check your connection and try again.",
         EMPTY_AI_RESPONSE:"AI assistant returned an empty answer. Please try again.",
         AI_CONNECTION_ERROR:"Unable to reach the AI service. Check your internet connection."
       };
       if(data.errorCode==="DEVICE_NOT_PAIRED")setDeviceConnected(false);
+      retryableFailure=["AI_PROVIDER_ERROR","AI_TIMEOUT","AI_CONNECTION_ERROR"].includes(data.errorCode);
       throw new Error(messages[data.errorCode]||data.error||"Something went wrong while contacting AI assistant.");
     }
     lastReply=data.reply||"";replyText.value=lastReply;addMessage("assistant",lastReply);
     aiStatus.textContent="AI assistant replied";aiHint.textContent="Reply received. Use Speak last reply to hear it.";
-  }catch(error){addMessage("assistant","I couldn't complete that request. "+(error.message||"Please try again."));aiStatus.textContent=deviceConnected?"AI unavailable":"Device not paired";aiHint.textContent=error.message||"Could not contact the AI backend.";}
+  }catch(error){addErrorMessage("I couldn't complete that request. "+(error.message||"Please try again."),retryableFailure?message:null);aiStatus.textContent=deviceConnected?"AI unavailable":"Device not paired";aiHint.textContent=error.message||"Could not contact the AI backend.";}
   finally{thinking.hidden=true;askAIButton.disabled=false;conversation.scrollTop=conversation.scrollHeight;}
 }
 askAIButton.addEventListener("click",sendMessage);
