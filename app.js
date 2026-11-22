@@ -94,7 +94,6 @@ async function sendMessage(retryMessage=null){
         AI_TIMEOUT:"The AI service took too long to respond. Your message is safe. Please try again.",
         AI_CONNECTION_ERROR:"The AI service could not be reached. Check your connection and try again.",
         EMPTY_AI_RESPONSE:"AI assistant returned an empty answer. Please try again.",
-        AI_CONNECTION_ERROR:"Unable to reach the AI service. Check your internet connection."
       };
       if(data.errorCode==="DEVICE_NOT_PAIRED")setDeviceConnected(false);
       retryableFailure=["AI_PROVIDER_ERROR","AI_TIMEOUT","AI_CONNECTION_ERROR"].includes(data.errorCode);
