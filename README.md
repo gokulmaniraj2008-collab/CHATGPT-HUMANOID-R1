@@ -42,9 +42,10 @@ Required Vercel environment variables:
 | Variable | Purpose |
 | --- | --- |
 | `GEMINI_API_KEY` | Secret API key created in Google AI Studio. Read only by the Vercel serverless function. |
-| `HUMANOID_ACCESS_CODE` | Existing private code used only for first-time device pairing. |\n| `HUMANOID_SESSION_SECRET` | Long random secret used to sign 30-day device sessions. |
+| `HUMANOID_ACCESS_CODE` | Existing private code used only for first-time device pairing. |
+| `HUMANOID_SESSION_SECRET` | Long random secret used to sign 30-day device sessions. |
 
-Do not put either value in `app.js`, `index.html`, other frontend files, or Git commits. Do not share secrets in screenshots or chat. The previous `OPENAI_API_KEY` is no longer read by the Gemini backend.
+Do not put any of these values in `app.js`, `index.html`, other frontend files, or Git commits. Do not share secrets in screenshots or chat. The previous `OPENAI_API_KEY` is no longer read by the Gemini backend.
 
 ## Local use
 
