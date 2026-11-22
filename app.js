@@ -7,6 +7,7 @@ const listenStatus = document.querySelector("#listenStatus");
 const startListening = document.querySelector("#startListening");
 const stopListening = document.querySelector("#stopListening");
 const speechSupport = document.querySelector("#speechSupport");
+const voiceLanguage = document.querySelector("#voiceLanguage");
 let cameraStream = null;
 let recognition = null;
 
@@ -40,7 +41,7 @@ window.addEventListener("pagehide", stopCameraStream);
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
-  recognition.lang = "en-IN";
+  recognition.lang = voiceLanguage.value;
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.onresult = event => {
@@ -76,7 +77,7 @@ if (SpeechRecognition) {
 
 startListening.addEventListener("click", () => {
   if (!recognition) return;
-  try { recognition.start(); } catch (error) { listenStatus.textContent = "Already starting"; }
+  try { recognition.lang = voiceLanguage.value; recognition.start(); } catch (error) { listenStatus.textContent = "Already starting"; }
 });
 stopListening.addEventListener("click", () => recognition?.stop());
 
@@ -85,7 +86,7 @@ document.querySelector("#speak").addEventListener("click", () => {
   if (!text || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-IN";
+  utterance.lang = voiceLanguage.value;
   window.speechSynthesis.speak(utterance);
 });
 document.querySelector("#stopSpeaking").addEventListener("click", () => window.speechSynthesis?.cancel());
