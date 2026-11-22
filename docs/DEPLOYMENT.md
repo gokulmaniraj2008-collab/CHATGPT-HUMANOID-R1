@@ -22,7 +22,7 @@ Keep all three values secret. Do not put them in frontend code, GitHub, screensh
 
 Clear the site's cookies to disconnect. Rotating `HUMANOID_SESSION_SECRET` invalidates all existing sessions.
 
-## Create a AI provider API key
+## Configure the server API key
 
 1. Open [Google AI Studio API keys](https://aistudio.google.com/apikey).
 2. Create an API key and keep it private. AI provider free-tier availability and limits are not unlimited or guaranteed.
