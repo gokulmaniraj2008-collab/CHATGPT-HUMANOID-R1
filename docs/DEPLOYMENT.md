@@ -10,7 +10,7 @@ In Vercel, open `chatgpt-humanoid-r1` → **Settings → Environment Variables**
 | `HUMANOID_ACCESS_CODE` | Existing private code used once to pair a device | Production |
 | `HUMANOID_SESSION_SECRET` | Long random secret (at least 32 bytes entropy) used to sign device sessions | Production |
 
-Keep all three values secret. Do not put them in frontend code, GitHub, screenshots, or chat. Do not reuse the Gemini API key or pairing code as the session secret.
+Keep all three values secret. Do not put them in frontend code, GitHub, screenshots, or chat. Do not reuse the AI provider API key or pairing code as the session secret.
 
 ## Pair a device once
 
@@ -22,23 +22,23 @@ Keep all three values secret. Do not put them in frontend code, GitHub, screensh
 
 Clear the site's cookies to disconnect. Rotating `HUMANOID_SESSION_SECRET` invalidates all existing sessions.
 
-## Create a Gemini API key
+## Configure the server API key
 
 1. Open [Google AI Studio API keys](https://aistudio.google.com/apikey).
-2. Create an API key and keep it private. Gemini free-tier availability and limits are not unlimited or guaranteed.
+2. Create an API key and keep it private. AI provider free-tier availability and limits are not unlimited or guaranteed.
 
 ## Redeploy and test
 
-Redeploy after changing environment variables. Test with a short, non-sensitive message. The camera preview remains local; camera frames are not sent to Gemini.
+Redeploy after changing environment variables. Test with a short, non-sensitive message. The camera preview remains local; camera frames are not sent to AI provider.
 
 ## Troubleshooting
 
 | Symptom | What to check |
 | --- | --- |
 | Secure pairing not configured | Confirm `HUMANOID_ACCESS_CODE` and `HUMANOID_SESSION_SECRET` exist in Production. |
-| Pairing code not recognised | Check `HUMANOID_ACCESS_CODE`; do not use the Gemini API key. |
+| Pairing code not recognised | Check `HUMANOID_ACCESS_CODE`; do not use the AI provider API key. |
 | Device asks to pair again | Session expired, cookies were cleared, or session secret changed. Pair again. |
-| Gemini usage limit reached | Check Google AI Studio usage and model limits. |
+| AI provider usage limit reached | Check Google AI Studio usage and model limits. |
 
 ## Security notes
 

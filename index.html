@@ -32,7 +32,7 @@
     <main class="main-area">
       <header class="topbar">
         <button id="menuToggle" class="icon-button mobile-menu" aria-label="Open navigation">☰</button>
-        <div class="topbar-title"><span class="live-dot"></span><span>AI Workspace</span><span class="model-pill">Gemini</span></div>
+        <div class="topbar-title"><span class="live-dot"></span><span>AI Workspace</span><span class="model-pill">AI assistant</span></div>
         <button id="settingsButton" class="icon-button" aria-label="Open device settings">⚙</button>
       </header>
 
@@ -77,7 +77,7 @@
           <div class="section-heading"><div><h3>Camera preview</h3><p class="muted">Preview stays on this device in this version.</p></div><span id="cameraStatus" class="status">Camera off</span></div>
           <video id="cameraPreview" autoplay playsinline muted></video>
           <div class="button-row"><button id="startCamera" class="primary-button">Start camera</button><button id="stopCamera" class="secondary-button" disabled>Stop camera</button></div>
-          <p class="hint">Camera frames are not sent to Gemini yet. AI vision requires a separate secure image-upload integration.</p>
+          <p class="hint">Camera frames are not sent to AI assistant yet. AI vision requires a separate secure image-upload integration.</p>
         </div>
         <div class="tool-panel" id="voicePanel">
           <div class="section-heading"><div><h3>Voice studio</h3><p class="muted">Speech recognition and spoken replies</p></div><span id="listenStatus" class="status">Microphone off</span></div>
@@ -89,8 +89,8 @@
         </div>
         <div class="tool-panel" id="pairingPanel">
           <div class="section-heading"><div><h3>Secure device pairing</h3><p class="muted">Pair once; the secure session is reused automatically.</p></div><span id="aiStatus" class="status">Not connected</span></div>
-          <div id="devicePairing"><label for="pairingCode">One-time private pairing code</label><input id="pairingCode" class="field" type="password" autocomplete="current-password" placeholder="Enter your private pairing code"><div class="button-row"><button id="connectDevice" class="primary-button">Connect this device</button></div><p class="hint">This is your private device code, not your Gemini API key. Never share it in chat.</p></div>
-          <p class="hint">Gemini API credentials remain on the server. Your device session uses a secure HttpOnly cookie.</p>
+          <div id="devicePairing"><label for="pairingCode">One-time private pairing code</label><input id="pairingCode" class="field" type="password" autocomplete="current-password" placeholder="Enter your private pairing code"><div class="button-row"><button id="connectDevice" class="primary-button">Connect this device</button></div><p class="hint">This is your private device code, not your AI assistant API key. Never share it in chat.</p></div>
+          <p class="hint">AI assistant API credentials remain on the server. Your device session uses a secure HttpOnly cookie.</p>
         </div>
       </section>
       <footer class="app-footer">HUMANOID R1 <span>·</span> Built for your device</footer>

@@ -15,55 +15,44 @@ function hasDeviceSession(req, secret) {
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 10;
 const requestsByIp = new Map();
-const GEMINI_MODEL = "gemini-3.8-flash";
-const GEMINI_FALLBACK_MODEL = "gemini-3.6-flash";
-const TRANSIENT_UPSTREAM_STATUSES = new Set([500, 502, 503, 504]);
+const PRIMARY_MODEL = "gemini-3.8-flash";
+const FALLBACK_MODEL = "gemini-3.6-flash";
+const TRANSIENT_UPSTREAM_STATUSES = new Set([408, 500, 502, 503, 504]);
+const REQUEST_TIMEOUT_MS = 12_000;
 
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function requestGemini(model, prompt, apiKey) {
-  const delays = [350, 900];
-  let response;
-  let data = {};
-
-  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
-    response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-      method: "POST",
-      headers: {
-        "x-goog-api-key": apiKey,
-        "Content-Type": "application/json",
-        "Api-Revision": "2026-05-20"
-      },
-      body: JSON.stringify({ model, input: prompt, store: false }),
-      signal: AbortSignal.timeout(20_000)
-    });
-    data = await response.json().catch(() => ({}));
-
-    if (response.ok || !TRANSIENT_UPSTREAM_STATUSES.has(response.status) || attempt === delays.length) {
-      return { response, data };
-    }
-    await wait(delays[attempt]);
+async function requestProvider(model, prompt, apiKey) {
+  try {
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
+      {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 1024, temperature: 0.7 }
+        }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    return { response, data, failure: null };
+  } catch (error) {
+    const timedOut = error?.name === "TimeoutError" || error?.name === "AbortError";
+    return { response: null, data: {}, failure: timedOut ? "timeout" : "network" };
   }
-
-  return { response, data };
 }
 
 function send(res, status, body) {
-  res.status(status).json(body);
+  return res.status(status).json(body);
 }
 
 function extractText(data) {
-  if (typeof data?.output_text === "string") return data.output_text.trim();
-  const parts = [];
-  for (const step of data?.steps || []) {
-    if (step?.type !== "model_output" || !Array.isArray(step.content)) continue;
-    for (const item of step.content) {
-      if (item?.type === "text" && typeof item.text === "string") parts.push(item.text);
-    }
-  }
-  return parts.join("\n").trim();
+  const parts = data?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return "";
+  return parts.filter(item => typeof item?.text === "string").map(item => item.text).join("\n").trim();
 }
 
 module.exports = async function handler(req, res) {
@@ -77,12 +66,12 @@ module.exports = async function handler(req, res) {
   if (!apiKey || !sessionSecret) {
     return send(res, 503, {
       errorCode: "AI_SETUP_INCOMPLETE",
-      error: "AI is not ready yet. The project owner needs to finish the server setup. Your camera, microphone, and speaker features are still available."
+      error: "The AI service is not configured yet. The project owner needs to finish the server setup."
     });
   }
 
   if (!hasDeviceSession(req, sessionSecret)) {
-    return send(res, 401, { errorCode: "DEVICE_NOT_PAIRED", error: "Connect this device once before sending messages to AI." });
+    return send(res, 401, { errorCode: "DEVICE_NOT_PAIRED", error: "Connect this device once before sending messages." });
   }
 
   const forwardedFor = req.headers["x-forwarded-for"] || "unknown";
@@ -102,7 +91,7 @@ module.exports = async function handler(req, res) {
 
   const languageName = language === "ta-IN" ? "Tamil" : language === "hi-IN" ? "Hindi" : "Indian English";
   const prompt = [
-    "You are the conversational AI for CHATGPT HUMANOID R1, a phone-first prototype.",
+    "You are the conversational AI for HUMANOID R1, a phone-first prototype.",
     "Reply in " + languageName + ".",
     "Be clear, concise, helpful, and safe.",
     "Do not claim to control physical hardware, see the camera, or hear live audio unless those inputs are actually provided.",
@@ -113,37 +102,50 @@ module.exports = async function handler(req, res) {
   ].join("\n");
 
   try {
-    let result = await requestGemini(GEMINI_MODEL, prompt, apiKey);
-    let usedModel = GEMINI_MODEL;
+    let result = await requestProvider(PRIMARY_MODEL, prompt, apiKey);
+    let usedModel = PRIMARY_MODEL;
 
-    if (!result.response.ok && TRANSIENT_UPSTREAM_STATUSES.has(result.response.status)) {
-      console.warn("Gemini primary model temporarily unavailable; trying fallback model.");
-      result = await requestGemini(GEMINI_FALLBACK_MODEL, prompt, apiKey);
-      usedModel = GEMINI_FALLBACK_MODEL;
+    const shouldFallback = result.failure !== null ||
+      (result.response && !result.response.ok && TRANSIENT_UPSTREAM_STATUSES.has(result.response.status));
+
+    if (shouldFallback) {
+      console.warn("Primary AI route unavailable; trying the backup model.", result.failure || result.response.status);
+      result = await requestProvider(FALLBACK_MODEL, prompt, apiKey);
+      usedModel = FALLBACK_MODEL;
+    }
+
+    if (result.failure) {
+      console.error("AI provider connection failed:", result.failure);
+      return send(res, result.failure === "timeout" ? 504 : 502, {
+        errorCode: result.failure === "timeout" ? "AI_TIMEOUT" : "AI_CONNECTION_ERROR",
+        error: result.failure === "timeout"
+          ? "The AI service took too long to respond. Please try again."
+          : "The AI service could not be reached. Please try again."
+      });
     }
 
     const { response: upstream, data } = result;
     if (!upstream.ok) {
-      console.error("Gemini API error:", upstream.status, data?.error?.status || "unknown", "model:", usedModel);
+      console.error("AI provider returned an error:", upstream.status, data?.error?.status || "unknown", "model:", usedModel);
       if (upstream.status === 429) return send(res, 429, {
         errorCode: "AI_USAGE_LIMIT",
-        error: "Gemini's free-tier request or usage limit has been reached. Please wait and try again later."
+        error: "The AI service has reached its current usage limit. Please wait and try again later."
       });
       if (upstream.status === 401 || upstream.status === 403) return send(res, 502, {
-        errorCode: "GEMINI_KEY_OR_ACCESS",
-        error: "Gemini could not authorise this request. The project owner should check the API key and Gemini API access."
+        errorCode: "AI_KEY_OR_ACCESS",
+        error: "The AI service could not authorise this request. The project owner should check the server API configuration."
       });
       return send(res, 502, {
         errorCode: "AI_PROVIDER_ERROR",
-        error: "Gemini is temporarily unavailable. Please try again in a little while."
+        error: "The AI service is temporarily unavailable. Please try again shortly."
       });
     }
 
     const answer = extractText(data);
-    if (!answer) return send(res, 502, { errorCode: "EMPTY_AI_RESPONSE", error: "Gemini didn't return a text answer. Please send your message again." });
+    if (!answer) return send(res, 502, { errorCode: "EMPTY_AI_RESPONSE", error: "The AI service returned an empty answer. Please try again." });
     return send(res, 200, { reply: answer, model: usedModel });
   } catch (error) {
-    console.error("Gemini request failed:", error?.message || "unknown error");
-    return send(res, 502, { errorCode: "AI_CONNECTION_ERROR", error: "We couldn't connect to Gemini. Check your internet connection and try again." });
+    console.error("AI request handler failed:", error?.message || "unknown error");
+    return send(res, 502, { errorCode: "AI_CONNECTION_ERROR", error: "The AI service could not be reached. Please try again." });
   }
 };
