@@ -1,0 +1,9 @@
+{
+  "name": "CHATGPT HUMANOID R1",
+  "short_name": "HUMANOID R1",
+  "description": "See, hear, and speak phone prototype",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#101827"
+}
